@@ -4,10 +4,12 @@ using System.Collections;
 public class InputManager
 {
 	public delegate void InputEvent();
+
 	//Held key events
 	public event InputEvent OnKeyLeft;
 	public event InputEvent OnKeyRight;
 	public event InputEvent OnKeyJump;
+	public event InputEvent OnKeyReset;
 
 	//Released key events
 	public event InputEvent ReleaseKeyLeftRight;
@@ -16,6 +18,7 @@ public class InputManager
 	public KeyCode leftKey;
 	public KeyCode rightKey;
 	public KeyCode jumpKey;
+	public KeyCode resetKey;
 
 	private static InputManager instance;
 
@@ -24,6 +27,7 @@ public class InputManager
 		leftKey = KeyCode.A;
 		rightKey =  KeyCode.D;
 		jumpKey = KeyCode.Space;
+		resetKey = KeyCode.R;
 	}
 
 	public static InputManager Instance
@@ -66,10 +70,16 @@ public class InputManager
 			if(OnKeyJump != null)
 				OnKeyJump();
 		}
-		else
+		if(Input.GetKeyUp(jumpKey))
 		{
 			if(ReleaseKeyJump != null)
 				ReleaseKeyJump();
+		}
+
+		if(Input.GetKey(resetKey))
+		{
+			if(OnKeyReset != null)
+				OnKeyReset();
 		}
 	}
 	
