@@ -20,6 +20,6 @@ public class CameraFollowScript : MonoBehaviour
 	{
 		//TODO: Maybe make camera a more gradual follower instead of direct
 		targetPos = FollowTarget.transform.position;
-		this.transform.position = new Vector3(FollowTarget.transform.position.x, FollowTarget.transform.position.y, cameraZPos);
+		this.transform.position = new Vector3(targetPos.x, targetPos.y, cameraZPos);
 	}
 }

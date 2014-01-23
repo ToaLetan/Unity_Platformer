@@ -12,7 +12,10 @@ public class Player : MonoBehaviour
 	public enum PlayerMovementState 
 	{ OnGround, Midair };
 
+	//Scripts attached to Player object
 	private PlatformerCollision collisionScript = null;
+	private AnimationManager animationScript = null;
+
 
 	//Horizontal movement variables
 	public float velocityX = 0;
@@ -28,7 +31,7 @@ public class Player : MonoBehaviour
 	public float distTravelledY = 0;
 	public float prevY = 0;
 	public PlatformerCollision.Direction currentDirectionY = PlatformerCollision.Direction.DOWN;
-	private PlayerMovementState currentMovementState = PlayerMovementState.OnGround;
+	//private PlayerMovementState currentMovementState = PlayerMovementState.OnGround;
 
 	//Player sprite variables
 	public float width = 0;
@@ -42,7 +45,8 @@ public class Player : MonoBehaviour
 
 	void Start () 
 	{
-		collisionScript = this.GetComponentInChildren<PlatformerCollision>();
+		collisionScript = gameObject.GetComponent<PlatformerCollision>();
+		animationScript = gameObject.GetComponent<AnimationManager>();
 
 		accelerationX = MAXVELOCITY / 5;
 		decelerationX = -1 * (accelerationX * 1.5f);
@@ -97,6 +101,8 @@ public class Player : MonoBehaviour
 			releasedJumpKey = false;
 			prevY = transform.position.y;
 			velocityY = JUMPVELOCITY;
+
+			animationScript.PlayAnimation("Player_Jump");
 		}
 	}
 
@@ -116,19 +122,29 @@ public class Player : MonoBehaviour
 	{
 		float newPlayerX = this.transform.position.x;
 
+		if(!isJumping)
+			animationScript.PlayAnimation("Player_Idle");
+
 		if(velocityX > 0)
 			velocityX = velocityX + decelerationX;
 		else
 			velocityX = 0;
 
 		newPlayerX += currentDirXInt * velocityX * Time.deltaTime;
-		this.transform.position = new Vector3(newPlayerX, this.transform.position.y, this.transform.position.z);
 
+		this.transform.position = new Vector3(newPlayerX, this.transform.position.y, this.transform.position.z);
 	}
 
 	private void PlayerMove(int moveDirection)
 	{
 		float newPlayerX = this.transform.position.x;
+		Vector3 newPlayerScale = this.transform.localScale;
+
+		newPlayerScale.x = moveDirection;
+		transform.localScale = newPlayerScale;
+
+		if(!isJumping)
+			animationScript.PlayAnimation("Player_Run");
 
 		//VelocityFinal = VelocityInitial + acceleration * time
 		if(velocityX < MAXVELOCITY)
@@ -166,6 +182,7 @@ public class Player : MonoBehaviour
 
 		if(distTravelledY <= -MAXJUMPHEIGHT || !pressedJumpKey)
 		{
+			animationScript.PlayAnimation("Player_MidAir");
 			//isJumping = false;
 			gameObject.rigidbody2D.gravityScale = gravity;
 			velocityY = 0;
@@ -186,6 +203,7 @@ public class Player : MonoBehaviour
 			//Check if the  player is touching the ground. If so, prevent any further movement in that direction and stop jumping.
 			if(collisionScript.CheckCollisionDirection(PlatformerCollision.Direction.DOWN) )
 			{
+				animationScript.PlayAnimation("Player_Land");
 				isJumping = false;
 				gameObject.rigidbody2D.gravityScale = gravity;
 				velocityY = 0;
